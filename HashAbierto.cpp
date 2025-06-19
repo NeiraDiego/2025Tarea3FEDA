@@ -34,6 +34,16 @@ void HashAbierto::insertar(Usuarios* u) {
   bucketsSN[idx_sn].push_back(u);
 }
 
+void HashAbierto::insertarPorID(Usuarios* u) {
+  size_t idx_id = hash(to_string(u->id), 0x9747b28c);
+  bucketsID[idx_id].push_back(u);
+}
+
+void HashAbierto::insertarPorSN(Usuarios* u) {
+  size_t idx_sn = hash(u->screenName, 0x5bd1e995);
+  bucketsSN[idx_sn].push_back(u);
+}
+
 Usuarios* HashAbierto::buscarPorID(int id) {
   size_t idx = hash(to_string(id), 0x9747b28c);
   for (Usuarios* u : bucketsID[idx]) {

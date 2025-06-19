@@ -55,6 +55,7 @@ Usuarios* HashCerrado::buscarPorID(int id) {
   string clave = to_string(id);
   for (int i = 0; i < capacidad; ++i) {
     size_t idx = hash(clave, i, 0x9747b28c);
+    if (!tabla[idx].ocupado && !tabla[idx].borrado) return nullptr;
     if (tabla[idx].ocupado && !tabla[idx].borrado && tabla[idx].dato->id == id)
       return tabla[idx].dato;
   }
@@ -64,6 +65,7 @@ Usuarios* HashCerrado::buscarPorID(int id) {
 Usuarios* HashCerrado::buscarPorScreenName(const string& name) {
   for (int i = 0; i < capacidad; ++i) {
     size_t idx = hash(name, i, 0x5bd1e995);
+    if (!tabla[idx].ocupado && !tabla[idx].borrado) return nullptr;
     if (tabla[idx].ocupado && !tabla[idx].borrado && tabla[idx].dato->screenName == name)
       return tabla[idx].dato;
   }

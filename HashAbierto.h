@@ -22,6 +22,9 @@ public:
 
   void insertar(Usuarios* u);
 
+  void insertarPorID(Usuarios* u);
+  void insertarPorSN(Usuarios* u);
+
   Usuarios* buscarPorID(int id);
   Usuarios* buscarPorScreenName(const string& name);
 
