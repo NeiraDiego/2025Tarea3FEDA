@@ -53,73 +53,90 @@ int main() {
   // cargamos todos los datos en un vector para acceder despues a ellos
   // asi hacemos un solo "vaciado" desde el archivo
   vector<Usuarios> todos;
+  cout << "cargando usuarios..." << endl;
     while (getline(file, linea)) {
       todos.push_back(procesLinea(linea));
       CuentaAPantalla++;
-      cout << CuentaAPantalla << endl; // esta es la linea que imprime a pantalla
+      // cout << CuentaAPantalla << endl; // esta es la linea que imprime a pantalla
+    }
+  cout << "...usuarios cargados" << endl;
+  ofstream out("resultados_insercion.csv");
+  cout << "realizando experimentos de inserción..." << endl;
+  out << "Cantidad,t_HC_ID,t_HC_SN,t_HA_ID,t_HA_SN,t_BST_ID,t_BTS_SN,s_HC_ID,s_HC_SN,s_HA_ID,s_HA_SN,s_BST_ID,s_BTS_SN\n";
+  for(int i = 0; i < 50; ++i){
+    for (int cantidad : {1000, 5000, 10000, 15000, 20000, 30000}) {
+      vector<Usuarios> datos(todos.begin(), todos.begin() + cantidad);
+
+      // ----------------------
+      // Hash Cerrado
+      // ----------------------
+      HashCerrado hashCerradoID(cantidad);
+      auto inicioHCID = high_resolution_clock::now();
+      for (auto& u : datos) hashCerradoID.insertarPorID(&u);
+      auto finHCID = high_resolution_clock::now();
+      auto durHCID = duration_cast<microseconds>(finHCID - inicioHCID).count();
+
+      HashCerrado hashCerradoSN(cantidad);
+      auto inicioHCSN = high_resolution_clock::now();
+      for (auto& u : datos) hashCerradoSN.insertarPorScreenName(&u);
+      auto finHCSN = high_resolution_clock::now();
+      auto durHCSN = duration_cast<microseconds>(finHCSN - inicioHCSN).count();
+
+      // ----------------------
+      // Hash Abierto
+      // ----------------------
+      HashAbierto hashAbiertoID(cantidad);
+      auto inicioHAID = high_resolution_clock::now();
+      for (auto& u : datos) hashAbiertoID.insertarPorID(&u);
+      auto finHAID = high_resolution_clock::now();
+      auto durHAID = duration_cast<microseconds>(finHAID - inicioHAID).count();
+
+      HashAbierto hashAbiertoSN(cantidad);
+      auto inicioHASN = high_resolution_clock::now();
+      for (auto& u : datos) hashAbiertoSN.insertarPorSN(&u);
+      auto finHASN = high_resolution_clock::now();
+      auto durHASN = duration_cast<microseconds>(finHASN - inicioHASN).count();
+
+      // ----------------------
+      // BST
+      // ----------------------
+      NodoBST_ID* bstID = nullptr;
+      auto inicioBSTID = high_resolution_clock::now();
+      for (auto& u : datos) insertarPorID(bstID, &u);
+      auto finBSTID = high_resolution_clock::now();
+      auto durBSTID = duration_cast<microseconds>(finBSTID - inicioBSTID).count();
+
+      NodoBST_SN* bstSN = nullptr;
+      auto inicioBSTSN = high_resolution_clock::now();
+      for (auto& u : datos) insertarPorID(bstID, &u);
+      auto finBSTSN = high_resolution_clock::now();
+      auto durBSTSN = duration_cast<microseconds>(finBSTSN - inicioBSTSN).count();
+
+
+      out << cantidad << "," << durHCID << "," << durHCSN << ",";
+      out << durHAID << "," << durHASN << "," << durBSTID << "," << durBSTSN << ",";
+
+    
+
+
+      // ----------------------
+      // Medición de memoria
+      // ----------------------
+      size_t memVec = tamanoUsuarios(datos);
+      size_t memHCID = hashCerradoID.capacidadC() * sizeof(Entry);
+      size_t memHCSN = hashCerradoSN.capacidadC() * sizeof(Entry);
+      size_t memHAID = hashAbiertoID.capacidadA() * sizeof(vector<Usuarios*>);
+      size_t memHASN = hashAbiertoSN.capacidadA() * sizeof(vector<Usuarios*>);
+      size_t memBSTID = cantidad * sizeof(NodoBST_ID);
+      size_t memBSTSN = cantidad * sizeof(NodoBST_SN);
+
+      out << memVec << "," << memHCID << "," << memHCSN << "," << memHAID << ",";
+      out << memHASN << "," << memBSTID << "," << memBSTSN << "\n";
+
+    }
   }
-  ofstream out("resultados_experimento.csv");
-  out << "Cantidad,TiempoBST,TiempoHashCerrado,TiempoHashAbierto,TamVector,TamBST,TamHashCerrado,TamHashAbierto\n";
-
-  for (int cantidad : {1000, 5000, 10000, 15000, 20000, 30000}) {
-    vector<Usuarios> datos(todos.begin(), todos.begin() + cantidad);
-
-    // ----------------------
-    // BST
-    // ----------------------
-    NodoBST_ID* bstID = nullptr;
-    auto inicioBSTID = high_resolution_clock::now();
-    for (auto& u : datos) insertarPorID(bstID, &u);
-    auto finBSTID = high_resolution_clock::now();
-    auto durBSTID = duration_cast<microseconds>(finBSTID - inicioBSTID).count();
-
-    NodoBST_SN* bstSN = nullptr;
-    auto inicioBSTSN = high_resolution_clock::now();
-    for (auto& u : datos) insertarPorID(bstID, &u);
-    auto finBSTSN = high_resolution_clock::now();
-    auto durBSTSN = duration_cast<microseconds>(finBSTSN - inicioBSTSN).count();
-
-    // ----------------------
-    // Hash Cerrado
-    // ----------------------
-    HashCerrado hashCerradoID(cantidad);
-    auto inicioHCID = high_resolution_clock::now();
-    for (auto& u : datos) hashCerradoID.insertarPorID(&u);
-    auto finHCID = high_resolution_clock::now();
-    auto durHCID = duration_cast<microseconds>(finHCID - inicioHCID).count();
-
-    HashCerrado hashCerradoSN(cantidad);
-    auto inicioHCSN = high_resolution_clock::now();
-    for (auto& u : datos) hashCerradoSN.insertarPorScreenName(&u);
-    auto finHCSN = high_resolution_clock::now();
-    auto durHCSN = duration_cast<microseconds>(finHCSN - inicioHCSN).count();
-
-    // ----------------------
-    // Hash Abierto
-    // ----------------------
-    HashAbierto hashAbiertoID(cantidad);
-    auto inicioHAID = high_resolution_clock::now();
-    for (auto& u : datos) hashAbiertoID.insertarPorID(&u);
-    auto finHAID = high_resolution_clock::now();
-    auto durHAID = duration_cast<microseconds>(finHAID - inicioHAID).count();
-
-    HashAbierto hashAbiertoSN(cantidad);
-    auto inicioHASN = high_resolution_clock::now();
-    for (auto& u : datos) hashAbiertoSN.insertarPorSN(&u);
-    auto finHASN = high_resolution_clock::now();
-    auto durHASN = duration_cast<microseconds>(finHASN - inicioHASN).count();
-
-    // ----------------------
-    // Medición de memoria
-    // ----------------------
-    size_t memVec = tamanoUsuarios(datos);
-    size_t memBST = cantidad * sizeof(NodoBST_ID);
-    size_t memHC = hashCerradoID.capacidadC() * sizeof(Entry);
-    size_t memHA = hashAbiertoID.capacidadA() * sizeof(vector<Usuarios*>);
-
-    out << cantidad << "," << durBSTID << "," << durHCID << "," << durHAID << ",";
-    out << memVec << "," << memBST << "," << memHC << "," << memHA << "\n";
-  }
+  cout << "...experimentos de inserción terminados" << endl;
+  out.close();
 
   // -------------------------------
   // BÚSQUEDAS EXITOSAS Y FALLIDAS
@@ -150,82 +167,89 @@ int main() {
     NombresABuscar.push_back(todos[idx].screenName); 
   }
 
-  cout << "HC_ID_si(us),HC_SN_si(us),HA_ID_si(us),HA_SN_si(us),BST_ID_si(us),BST_SN_si(us),HC_ID_no(us),HC_SN_no(us),HA_ID_no(us),HA_SN_no(us),BST_ID_no(us),BST_SN_no(us)" << endl;
-  // Búsquedas exitosas
-  auto ini = high_resolution_clock::now();
-  for (int ind : IdUsuariosABuscar) hcerradoID.buscarPorID(ind);
-  auto fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda exitosa HashCerrado por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+  ofstream out2("resultados_busqueda.csv");
+    out2 << "HC_ID_si(us),HC_SN_si(us),HA_ID_si(us),HA_SN_si(us),BST_ID_si(us),BST_SN_si(us)";
+    out2 << ",HC_ID_no(us),HC_SN_no(us),HA_ID_no(us),HA_SN_no(us),BST_ID_no(us),BST_SN_no(us)" << endl;
+  cout << "realizando experimentos de búsqueda..." << endl;
+  for(int i = 0; i < 50; ++i){
+    // Búsquedas exitosas
+    auto ini = high_resolution_clock::now();
+    for (int ind : IdUsuariosABuscar) hcerradoID.buscarPorID(ind);
+    auto fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda exitosa HashCerrado por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (string nombr : NombresABuscar) hcerradoSN.buscarPorScreenName(nombr);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda exitosa HashCerrado por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (string nombr : NombresABuscar) hcerradoSN.buscarPorScreenName(nombr);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda exitosa HashCerrado por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
   
-  ini = high_resolution_clock::now();
-  for (int ind : IdUsuariosABuscar) habiertoID.buscarPorID(ind);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda exitosa HashAbierto por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (int ind : IdUsuariosABuscar) habiertoID.buscarPorID(ind);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda exitosa HashAbierto por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (string nombr : NombresABuscar) habiertoSN.buscarPorScreenName(nombr);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda exitosa HashAbierto por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (string nombr : NombresABuscar) habiertoSN.buscarPorScreenName(nombr);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda exitosa HashAbierto por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
   
-  ini = high_resolution_clock::now();
-  for (int ind : IdUsuariosABuscar) buscarPorID(bstID, ind);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda exitosa BST por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (int ind : IdUsuariosABuscar) buscarPorID(bstID, ind);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda exitosa BST por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (string nombr : NombresABuscar) buscarPorScreenName(bstSN, nombr);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda exitosa BST por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (string nombr : NombresABuscar) buscarPorScreenName(bstSN, nombr);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda exitosa BST por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  // Búsquedas fallidas
-  ini = high_resolution_clock::now();
-  for (int i = 0; i < 100; i++) hcerradoID.buscarPorID(i);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda fallida Hashabierto por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    // Búsquedas fallidas
+    ini = high_resolution_clock::now();
+    for (int i = 0; i < 100; i++) hcerradoID.buscarPorID(i);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda fallida Hashabierto por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (int i = 0; i < 100; i++) hcerradoSN.buscarPorScreenName("NoExiste@" + to_string(i));
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda fallida HashAbierto por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (int i = 0; i < 100; i++) hcerradoSN.buscarPorScreenName("NoExiste@" + to_string(i));
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda fallida HashAbierto por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (int i = 0; i < 100; i++) habiertoID.buscarPorID(i);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda fallida Hashabierto por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (int i = 0; i < 100; i++) habiertoID.buscarPorID(i);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda fallida Hashabierto por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (int i = 0; i < 100; i++) habiertoSN.buscarPorScreenName("NoExiste@" + to_string(i));
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda fallida HashAbierto por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (int i = 0; i < 100; i++) habiertoSN.buscarPorScreenName("NoExiste@" + to_string(i));
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda fallida HashAbierto por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (int i = 0; i < 100; i++) buscarPorID(bstID, i);
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count() << ",";
-  //cout << "Búsqueda fallida BTS por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    ini = high_resolution_clock::now();
+    for (int i = 0; i < 100; i++) buscarPorID(bstID, i);
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count() << ",";
+    //out2 << "Búsqueda fallida BTS por ID: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
 
-  ini = high_resolution_clock::now();
-  for (int i = 0; i < 100; i++) buscarPorScreenName(bstSN, "NoExiste@" + to_string(i));
-  fin = high_resolution_clock::now();
-  cout << duration_cast<microseconds>(fin - ini).count();
-  //cout << "Búsqueda fallida BTS por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
-  cout << endl;
+    ini = high_resolution_clock::now();
+    for (int i = 0; i < 100; i++) buscarPorScreenName(bstSN, "NoExiste@" + to_string(i));
+    fin = high_resolution_clock::now();
+    out2 << duration_cast<microseconds>(fin - ini).count();
+    //out2 << "Búsqueda fallida BTS por ScreenName: " << duration_cast<microseconds>(fin - ini).count() << " us\n";
+    out2 << endl;
+  }
+  cout << "...experimentos de busqueda terminados" << endl;
 
+  cout << "listo" << endl;
   out.close();
   return 0;
 }
