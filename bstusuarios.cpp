@@ -20,7 +20,8 @@ struct NodoBST_SN {
     NodoBST_SN(Usuarios* u) : dato(u), izq(nullptr), der(nullptr) {}
 };
 
-// Inserciones
+// Funcion de inseratar un nuevo nodo comenzando desde la raiz
+// elemento que definirá el arbol a la hora de "llamarlo"
 void insertarPorID(NodoBST_ID*& raiz, Usuarios* nuevo) {
     if (!raiz)
         raiz = new NodoBST_ID(nuevo);

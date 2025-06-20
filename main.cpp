@@ -62,7 +62,7 @@ int main() {
   cout << "...usuarios cargados" << endl;
   ofstream out("resultados_insercion.csv");
   cout << "realizando experimentos de inserción..." << endl;
-  out << "Cantidad,t_HC_ID,t_HC_SN,t_HA_ID,t_HA_SN,t_BST_ID,t_BTS_SN,s_HC_ID,s_HC_SN,s_HA_ID,s_HA_SN,s_BST_ID,s_BTS_SN\n";
+  out << "Cantidad,t_HC_ID,t_HC_SN,t_HA_ID,t_HA_SN,t_BST_ID,t_BTS_SN,s_Vec,s_HC_ID,s_HC_SN,s_HA_ID,s_HA_SN,s_BST_ID,s_BTS_SN\n";
   for(int i = 0; i < 50; ++i){
     for (int cantidad : {1000, 5000, 10000, 15000, 20000, 30000}) {
       vector<Usuarios> datos(todos.begin(), todos.begin() + cantidad);

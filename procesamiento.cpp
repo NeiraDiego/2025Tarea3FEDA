@@ -8,6 +8,10 @@
 
 using namespace std;
 
+// en esta parte del código debí restringir lo que hacía cada parte
+// ya que estaba causando errores y no me dio tiempo para devolver 
+// la funcionalidad completa, sin embargo cumple con todo lo que 
+// se necesita para funcionar
 Usuarios procesLinea(const string& linea2) {
   Usuarios user;
   // eimina un simbolo " que aparece al principio y final de la linea

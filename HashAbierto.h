@@ -20,7 +20,7 @@ public:
 
   size_t capacidadA();
 
-  void insertar(Usuarios* u);
+//  void insertar(Usuarios* u);
 
   void insertarPorID(Usuarios* u);
   void insertarPorSN(Usuarios* u);
